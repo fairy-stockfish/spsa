@@ -61,6 +61,7 @@ my $draw_score_limit = $Config->{Engine}->{DrawScoreLimit} ; defined($draw_score
 my $draw_move_limit  = $Config->{Engine}->{DrawMoveLimit}  ; defined($draw_move_limit)  || $simulate || die "DrawMoveLimit not defined!";
 my $win_score_limit  = $Config->{Engine}->{WinScoreLimit}  ; defined($win_score_limit)  || $simulate || die "WinScoreLimit not defined!";
 my $win_move_limit   = $Config->{Engine}->{WinMoveLimit}   ; defined($win_move_limit)   || $simulate || die "WinMoveLimit not defined!";
+my $variant          = $Config->{Engine}->{Variant}        ; defined($variant)          || $simulate || die "Variant not defined!";
 
 $threads = 1 if ($simulate);
 
@@ -339,6 +340,9 @@ sub engine_init
 
     print Eng1_Writer "uci\n";
     print Eng2_Writer "uci\n";
+
+    print Eng1_Writer "setoption name $variant value true\n";
+    print Eng2_Writer "setoption name $variant value true\n";
 
     while(engine_readline(\*Eng1_Reader) ne "uciok") {} 
     while(engine_readline(\*Eng2_Reader) ne "uciok") {}
