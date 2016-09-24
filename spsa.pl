@@ -341,8 +341,8 @@ sub engine_init
     print Eng1_Writer "uci\n";
     print Eng2_Writer "uci\n";
 
-    print Eng1_Writer "setoption name $variant value true\n";
-    print Eng2_Writer "setoption name $variant value true\n";
+    print Eng1_Writer "setoption name UCI_Variant value $variant\n";
+    print Eng2_Writer "setoption name UCI_Variant value $variant\n";
 
     while(engine_readline(\*Eng1_Reader) ne "uciok") {} 
     while(engine_readline(\*Eng2_Reader) ne "uciok") {}
