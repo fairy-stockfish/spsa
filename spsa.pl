@@ -44,9 +44,9 @@ $Config = Config::Tiny->read($ConfigFile) || die "Unable to read configuration f
 
 my $simulate       = $Config->{Main}->{Simulate}  ; defined($simulate)       || die "Simulate not defined!";
 my $variables_path = $Config->{Main}->{Variables} ; defined($variables_path) || die "Variables not defined!";
-my $log_path       = $Config->{Main}->{Log}       ; defined($log_path)       || die "Log not defined!";;
-my $gamelog_path   = $Config->{Main}->{GameLog}   ; defined($gamelog_path)   || die "GameLog not defined!";;
-my $iterations     = $Config->{Main}->{Iterations}; defined($iterations)     || die "Iterations not defined!";;
+my $log_path       = $Config->{Main}->{Log}       ; defined($log_path)       || die "Log not defined!";
+my $gamelog_path   = $Config->{Main}->{GameLog}   ; defined($gamelog_path)   || die "GameLog not defined!";
+my $iterations     = $Config->{Main}->{Iterations}; defined($iterations)     || die "Iterations not defined!";
 my $A              = $Config->{Main}->{A}         ; defined($A)              || die "A not defined!";
 my $gamma          = $Config->{Main}->{Gamma}     ; defined($gamma)          || die "Gamma not defined!";
 my $alpha          = $Config->{Main}->{Alpha}     ; defined($alpha)          || die "Alpha not defined!";
@@ -129,7 +129,7 @@ sub read_csv
     {
         die "Wrong number of columns!" if (scalar(@$row) != $VAR_END);
 
-        die "Invalid name: '$row->[$VAR_NAME]'"               if ($row->[$VAR_NAME]      !~ /^[\w\[\]]+$/);
+        die "Invalid name: '$row->[$VAR_NAME]'"               if ($row->[$VAR_NAME]      !~ /^[ \w\[\]]+$/);
         die "Invalid current: '$row->[$VAR_START]'"           if ($row->[$VAR_START]     !~ /^[-+]?[0-9]*\.?[0-9]+$/);
         die "Invalid max: '$row->[$VAR_MAX]'"                 if ($row->[$VAR_MAX]       !~ /^[-+]?[0-9]*\.?[0-9]+$/);
         die "Invalid min: '$row->[$VAR_MIN]'"                 if ($row->[$VAR_MIN]       !~ /^[-+]?[0-9]*\.?[0-9]+$/);
@@ -157,7 +157,7 @@ sub read_csv
     
     foreach $row (@variables)
     {
-        $shared_theta{$row->[$VAR_NAME]} = $row->[$VAR_START];    
+        $shared_theta{$row->[$VAR_NAME]} = $row->[$VAR_START];
     }
 
     # STEP. Launch SPSA threads
@@ -239,11 +239,13 @@ sub run_spsa
                  $var_c{$name}      = $row->[$VAR_C] / $iter ** $gamma;
                  $var_R{$name}      = $var_a{$name} / $var_c{$name} ** 2;
                  $var_delta{$name}  = int(rand(2)) ? 1 : -1;
+                 my $step           = $var_c{$name} * $var_delta{$name};
 
-                 $var_eng1{$name} = min(max($var_value{$name} + $var_c{$name} * $var_delta{$name}, $var_min{$name}), $var_max{$name});
-                 $var_eng2{$name} = min(max($var_value{$name} - $var_c{$name} * $var_delta{$name}, $var_min{$name}), $var_max{$name});
+                 $var_eng1{$name} = min(max($var_value{$name} + $step, $var_min{$name}), $var_max{$name});
+                 $var_eng2{$name} = min(max($var_value{$name} - $step, $var_min{$name}), $var_max{$name});
 
-                 print "Iteration: $iter, variable: $name, value: $var_value{$name}, a: $var_a{$name}, c: $var_c{$name}, R: $var_R{$name}\n";
+                 $step = abs($step);
+                 print "Iteration: $iter, variable: $name, value: $var_value{$name} ± $step, a: $var_a{$name}, R: $var_R{$name}\n";
              }
         }
 
@@ -344,8 +346,14 @@ sub engine_init
     print Eng1_Writer "setoption name UCI_Variant value $variant\n";
     print Eng2_Writer "setoption name UCI_Variant value $variant\n";
 
-    while(engine_readline(\*Eng1_Reader) ne "uciok") {} 
-    while(engine_readline(\*Eng2_Reader) ne "uciok") {}
+    while(($line = engine_readline(\*Eng1_Reader)) ne "uciok")
+    {
+        print "Engine 1: $line\n";
+    }
+    while(($line = engine_readline(\*Eng2_Reader)) ne "uciok")
+    {
+        print "Engine 2: $line\n";
+    }
 }
 
 sub engine_quit 
@@ -399,8 +407,14 @@ sub engine_2games
         print Eng2_Writer "isready\n";
 
         # STEP. Wait for engines to be ready
-        while(engine_readline(\*Eng1_Reader) ne "readyok") {}
-        while(engine_readline(\*Eng2_Reader) ne "readyok") {}
+        while(($line = engine_readline(\*Eng1_Reader)) ne "readyok")
+        {
+            print "Engine 1: $line\n";
+        }
+        while(($line = engine_readline(\*Eng2_Reader)) ne "readyok")
+        {
+            print "Engine 2: $line\n";
+        }
 
         # STEP. Init Thinking times
         my $eng1_time = $base_time;
