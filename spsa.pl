@@ -212,7 +212,7 @@ sub run_spsa
     while(1)
     {
         # SPSA coefficients indexed by variable.
-        my (%var_value, %var_min, %var_max, %var_a, %var_c, %var_R, %var_delta, %var_eng1, %var_eng2);
+        my (%var_min, %var_max, %var_a, %var_c, %var_R, %var_delta, %var_eng1, %var_eng2);
         my $iter; 
 
         {
@@ -228,11 +228,10 @@ sub run_spsa
              $iter = $shared_iter;
 
              # STEP. Calculate the necessary coefficients for each variable.
+             printf "Iteration %d\n", $iter;
              foreach $row (@variables)
              {
-                 my $name  = $row->[$VAR_NAME];
-
-                 $var_value{$name}  = $shared_theta{$name};
+                 my $name           = $row->[$VAR_NAME];
                  $var_min{$name}    = $row->[$VAR_MIN];
                  $var_max{$name}    = $row->[$VAR_MAX];
                  $var_a{$name}      = $row->[$VAR_A] / ($A + $iter) ** $alpha;
@@ -241,11 +240,12 @@ sub run_spsa
                  $var_delta{$name}  = int(rand(2)) ? 1 : -1;
                  my $step           = $var_c{$name} * $var_delta{$name};
 
-                 $var_eng1{$name} = min(max($var_value{$name} + $step, $var_min{$name}), $var_max{$name});
-                 $var_eng2{$name} = min(max($var_value{$name} - $step, $var_min{$name}), $var_max{$name});
+                 $var_eng1{$name} = min(max($shared_theta{$name} + $step, $var_min{$name}), $var_max{$name});
+                 $var_eng2{$name} = min(max($shared_theta{$name} - $step, $var_min{$name}), $var_max{$name});
 
-                 $step = abs($step);
-                 print "Iteration: $iter, variable: $name, value: $var_value{$name} ± $step, a: $var_a{$name}, R: $var_R{$name}\n";
+                 my $lower = min($var_eng1{$name}, $var_eng2{$name});
+                 my $upper = max($var_eng1{$name}, $var_eng2{$name});
+                 printf "Parameter: %s, theta: %f, x: [%f, %f], a: %f, R: %f\n", $name, $shared_theta{$name}, $lower, $upper, $var_a{$name}, $var_R{$name};
              }
         }
 
@@ -262,7 +262,7 @@ sub run_spsa
             {
                 my $name = $row->[$VAR_NAME];
 
-                $shared_theta{$name} += $var_R{$name} * $var_c{$name} * $result / $var_delta{$name};
+                $shared_theta{$name} += ($var_a{$name} * $result) / ($var_c{$name} * $var_delta{$name});
                 $shared_theta{$name} = max(min($shared_theta{$name}, $var_max{$name}), $var_min{$name});
                 
                 $logLine .= ",$shared_theta{$name}";
