@@ -76,8 +76,10 @@ Column 5: Relative apply factor "Rk" for the last iteration (float)
 Column 6: For simulation mode, this defines the ELO decrease for point x = (+/-) 100 compared to point x = 0 (optimum) (float).
 
 Notes: 
-- When ck is defined for the last iteration and the number of iterations is known, it's easy to derive a value for c.
-- When ck and Rk are defined for the last iterations, it's easy to derive ak for the last iteration. Based on that we can derive value for a.
+- When ck is defined for the last iteration and the number of iterations is known,
+  it's easy to derive a value for c.
+- When ck and Rk are defined for the last iterations, it's easy to derive ak for the last iteration.
+  Based on that we can derive value for a.
 
 5. Getting Started
 ==================
@@ -98,7 +100,8 @@ Notes:
 6. Practical Guidelines
 =======================
 
-To tune SPSA, see the Semiautomatic Tuning method by Spall introduced in his book [Introduction to Stochastic Search and Optimization (ISSO)](http://jhuapl.edu/ISSO/).
+To tune SPSA, see the Semiautomatic Tuning method by Spall introduced in his book
+[Introduction to Stochastic Search and Optimization (ISSO)](http://jhuapl.edu/ISSO/).
 There are 3 main knobs, the two gain sequences (_a_ and _c_), and the perturbation distribution, delta.
 Delta is best chosen as Bernoulli (+/- 1), as that is asymptotically optimal (it must not be Normal or Uniform, see ISSO).
 There are rules about the properties of the gain sequences. The standard form works well, and follows the forms:
@@ -108,9 +111,12 @@ a(k) = a / (k + 1 + A) ^ alpha
 c(k) = c / (k + 1) ^ gamma
 ```
 
-Here, the values alpha and gamma are tied together, asymptotically optimial is _alpha_ = 1 and _gamma_ = 1/6, but the values _alpha_ = .602 and _gamma_ = .101 work well for finite cases.
-_A_ should be about 10% of the total iterations, and _c_ should be approximately the standard error of the loss function in question.
-_a_ is the most volatile parameter, and must be tuned carefully. In general, one should pick _a_ (by picking _R_) such that the first step is not too large so as to send the algorithm in the wrong direction.
+Here, the values alpha and gamma are tied together, asymptotically optimal are _alpha_ = 1 and _gamma_ = 1/6,
+but the values _alpha_ = .602 and _gamma_ = .101 work well for finite cases.
+_A_ should be about 10% of the total iterations, and _c_ should be approximately the standard error
+of the loss function in question.
+_a_ is the most volatile parameter, and must be tuned carefully. In general, one should pick _a_
+(by picking _R_) such that the first step is not too large so as to send the algorithm in the wrong direction.
 
 To be able to successfully use SPSA for tuning, one needs to determine good values for coefficients ck and Rk.
 In most cases, it's impossible to determine ideal values. 
