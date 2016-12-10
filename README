@@ -125,6 +125,7 @@ Rk for the last iteration (CSV-file, column 5): 0.002
 ck for the last iteration (CSV-file, column 4): 4 centipawns (= 8 in Stockfish's internal scale)
 
 However if parameter is very insensitive ELO-wise, one needs to use a larger value for ck.
-Also if one has even some sort of idea about the ELO-sensitivity of the parameter and how far from optimum
-it might be at maximum, one can use the built-in simulator, to discover good values for Rk and ck.
+Also if one has even some sort of idea about the ELO-sensitivity of the parameter and how far
+from optimum it might be at maximum, one can use the built-in simulator, to discover good values
+for Rk and ck.
 See files 'simul_1var.conf' and 'simul_1var.var' as an example.
