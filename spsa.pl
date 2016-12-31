@@ -222,6 +222,17 @@ sub run_spsa
              if (++$shared_iter > $iterations)
              {
                  engine_quit() if (!$simulate);
+                 printf "%d iterations\n", $iterations;
+                 foreach $row (@variables)
+                 {
+                     my $name           = $row->[$VAR_NAME];
+                     $var_min{$name}    = $row->[$VAR_MIN];
+                     $var_max{$name}    = $row->[$VAR_MAX];
+                     $var_a{$name}      = $row->[$VAR_A] / ($A + $iterations) ** $alpha;
+                     $var_c{$name}      = $row->[$VAR_C] / $iterations ** $gamma;
+                     $var_R{$name}      = $var_a{$name} / $var_c{$name} ** 2;
+                     printf "%s, %f, %f, %f, %f, %f, %d\n", $name, $shared_theta{$name}, $var_min{$name}, $var_max{$name}, $var_c{$name}, $var_R{$name}, $simulate;
+                 }
                  return;
              }
 
@@ -548,5 +559,6 @@ READ:      while($line = engine_readline($Curr_Reader))
        $result += ($winner == 1 ? 1 : $winner == 2 ? -1 : 0);
    }
 
-   return $result;
+   # Calculate Elo loss among (-400, -191, 0, 191, 400) normalized to [-2.0, 2.0]
+   return (-2.0, -0.955, 0, 0.955, 2.0)[$result + 2];
 }
