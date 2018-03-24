@@ -341,6 +341,7 @@ sub engine_init
     my @lines;
     (@lines) = <INPUT>;
     @fenlines = grep {/\w+/} @lines; # Filter out empty lines
+    chomp(@fenlines);
     close (INPUT);
     die "epd read failure!" if ($#fenlines == -1);
 
